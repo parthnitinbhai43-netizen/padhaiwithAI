@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PadhaiWithAI – Har Student Ka Smart Ustaad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060912;
+  --surface: #0d1220;
+  --card: #111827;
+  --card2: #141e30;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #6ee7f7;
+  --accent2: #a78bfa;
+  --accent3: #34d399;
+  --accent4: #fb923c;
+  --text: #f0f4ff;
+  --muted: #7a8aaa;
+  --muted2: #4a5568;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BG ── */
+.bg-orbs {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: 0.18; animation: drift 18s ease-in-out infinite;
+}
+.orb1 { width:500px; height:500px; background:#6ee7f7; top:-100px; left:-150px; animation-delay: 0s; }
+.orb2 { width:400px; height:400px; background:#a78bfa; bottom:-80px; right:-100px; animation-delay: -6s; }
+.orb3 { width:300px; height:300px; background:#34d399; top:40%; left:50%; animation-delay: -12s; }
+@keyframes drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(40px,-30px) scale(1.08); }
+  66% { transform: translate(-20px,40px) scale(0.95); }
+}
+
+/* ── NOISE TEXTURE ── */
+body::after {
+  content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.3;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top:0; z-index: 200;
+  background: rgba(6,9,18,0.8);
+  backdrop-filter: blur(24px) saturate(1.6);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.logo-wrap { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items:center; justify-content:center;
+  font-size: 1.1rem; flex-shrink:0;
+  box-shadow: 0 0 20px rgba(110,231,247,0.3);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.logo .with { color: var(--muted); font-weight: 400; }
+.logo .ai-word {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.tagline-head {
+  font-size: 0.65rem; color: var(--muted); margin-top: 1px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.header-right { display:flex; align-items:center; gap:10px; }
+
+.lang-switcher { display:flex; gap:4px; }
+.lang-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 5px 12px; border-radius: 8px;
+  font-size: 0.72rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.03em;
+}
+.lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lang-btn.active {
+  background: rgba(110,231,247,0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── ANNOUNCEMENT ── */
+.announce {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 9px 16px;
+  background: linear-gradient(90deg, rgba(110,231,247,0.07), rgba(167,139,250,0.07));
+  border-bottom: 1px solid rgba(110,231,247,0.12);
+  font-size: 0.75rem; color: var(--muted);
+  font-weight: 500; letter-spacing: 0.04em;
+}
+.announce strong {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 72px 20px 48px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(110,231,247,0.08);
+  border: 1px solid rgba(110,231,247,0.2);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.06em;
+  margin-bottom: 28px;
+  animation: fadeInUp 0.6s ease both;
+}
+.hero-badge::before { content: '✦'; font-size: 0.6rem; }
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 6.5vw, 4rem);
+  font-weight: 800; line-height: 1.08;
+  margin-bottom: 20px;
+  letter-spacing: -1.5px;
+  animation: fadeInUp 0.7s 0.1s ease both;
+}
+.hero h1 .glow {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 24px rgba(110,231,247,0.35));
+}
+.hero p {
+  color: var(--muted);
+  max-width: 520px; margin: 0 auto 40px;
+  font-size: 1rem; line-height: 1.75;
+  animation: fadeInUp 0.7s 0.2s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity:0; transform: translateY(20px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+/* ── STATS ── */
+.stats-row {
+  position: relative; z-index: 10;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  max-width: 900px; margin: 0 auto 52px;
+  padding: 0 16px;
+  animation: fadeInUp 0.7s 0.3s ease both;
+}
+.stat-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 22px;
+  min-width: 150px;
+}
+.stat-icon { font-size: 1.4rem; }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.stat-label { font-size: 0.67rem; color: var(--muted); margin-top: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* ── CLASS FILTER ── */
+.class-filter {
+  position: relative; z-index: 10;
+  max-width: 900px; margin: 0 auto 44px;
+  padding: 0 16px;
+  text-align: center;
+}
+.class-filter h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 14px;
+}
+.class-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.class-tab {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 8px 18px; border-radius: 10px;
+  font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.class-tab:hover { border-color: var(--border2); color: var(--text); }
+.class-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+  color: #060912; transform: scale(1.04);
+}
+
+/* ── TOOLS SECTION ── */
+.tools-section {
+  position: relative; z-index: 10;
+  max-width: 1140px; margin: 0 auto;
+  padding: 0 16px 80px;
+}
+.section-heading {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 10px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem; font-weight: 800;
+  display: flex; align-items: center; gap: 10px;
+}
+.pill {
+  font-size: 0.62rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+  background: rgba(110,231,247,0.1);
+  color: var(--accent);
+  letter-spacing: 0.07em; text-transform: uppercase;
+  border: 1px solid rgba(110,231,247,0.2);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 14px;
+}
+
+/* ── TOOL CARD ── */
+.tool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+}
+.tool-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  border-radius: 18px 18px 0 0;
+  opacity: 0; transition: opacity 0.25s;
+}
+.tool-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--border2);
+  background: var(--card2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.tool-card:hover::after { opacity: 1; }
+.tool-card.cyan::after  { background: linear-gradient(90deg, var(--accent), #38bdf8); }
+.tool-card.violet::after { background: linear-gradient(90deg, var(--accent2), #818cf8); }
+.tool-card.emerald::after { background: linear-gradient(90deg, var(--accent3), #06b6d4); }
+.tool-card.orange::after { background: linear-gradient(90deg, var(--accent4), #f59e0b); }
+
+.tool-glow {
+  position: absolute; top: -20px; right: -20px;
+  width: 80px; height: 80px; border-radius: 50%;
+  opacity: 0; filter: blur(30px); transition: opacity 0.3s;
+  pointer-events: none;
+}
+.tool-card:hover .tool-glow { opacity: 0.25; }
+.cyan .tool-glow  { background: var(--accent); }
+.violet .tool-glow { background: var(--accent2); }
+.emerald .tool-glow { background: var(--accent3); }
+.orange .tool-glow { background: var(--accent4); }
+
+.tool-icon {
+  font-size: 2rem; margin-bottom: 14px; display: inline-block;
+  transition: transform 0.25s;
+}
+.tool-card:hover .tool-icon { transform: scale(1.15) rotate(-5deg); }
+.tool-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 7px; }
+.tool-desc { font-size: 0.77rem; color: var(--muted); line-height: 1.65; margin-bottom: 16px; }
+.tool-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  font-size: 0.63rem; font-weight: 600;
+  padding: 2px 9px; border-radius: 999px;
+  border: 1px solid;
+}
+.tag.cyan    { color: var(--accent);  border-color: rgba(110,231,247,0.3); background: rgba(110,231,247,0.07); }
+.tag.violet  { color: var(--accent2); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07); }
+.tag.emerald { color: var(--accent3); border-color: rgba(52,211,153,0.3);  background: rgba(52,211,153,0.07); }
+.tag.orange  { color: var(--accent4); border-color: rgba(251,146,60,0.3);  background: rgba(251,146,60,0.07); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(12px);
+  z-index: 1000; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  width: 100%; max-width: 700px;
+  max-height: 90vh; overflow: hidden;
+  display: flex; flex-direction: column;
+  animation: modalIn 0.32s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+}
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.92) translateY(20px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+.modal-header {
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+}
+.modal-icon-wrap {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+}
+.modal-title  { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+.modal-subtitle { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+.modal-close {
+  margin-left: auto; background: none; border: none;
+  color: var(--muted); font-size: 1.3rem; cursor: pointer;
+  padding: 6px 10px; border-radius: 10px;
+  transition: all 0.18s;
+}
+.modal-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+.modal-body { padding: 20px 26px; overflow-y: auto; flex: 1; }
+
+/* chips */
+.quick-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.chip {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--muted); font-size: 0.72rem;
+  padding: 6px 13px; border-radius: 999px;
+  cursor: pointer; transition: all 0.18s;
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(110,231,247,0.07); }
+
+/* chat */
+.chat-messages {
+  display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 16px; min-height: 120px;
+}
+.msg {
+  max-width: 85%; padding: 13px 17px; border-radius: 16px;
+  font-size: 0.84rem; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-word;
+}
+.msg.ai {
+  background: rgba(110,231,247,0.07);
+  border: 1px solid rgba(110,231,247,0.15);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+.msg.user {
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+.msg.loading { color: var(--muted); font-style: italic; }
+
+.typing-dots { display: inline-flex; gap: 4px; align-items: center; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); opacity: 0.6;
+  animation: bounce 1s ease infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+.chat-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem; padding: 11px 15px; resize: none;
+  outline: none; transition: border-color 0.2s; min-height: 46px;
+}
+.chat-input:focus { border-color: var(--accent); }
+.send-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #060912;
+  border: none; border-radius: 13px;
+  font-weight: 700; font-size: 0.82rem;
+  padding: 11px 20px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.send-btn:hover { opacity: 0.88; transform: scale(1.03); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ── FOOTER ── */
+.footer {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 32px 20px 44px;
+  border-top: 1px solid var(--border);
+}
+.footer-inner {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 0.78rem; color: var(--muted);
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.heart { color: #fb7185; animation: heartbeat 1.6s ease infinite; }
+@keyframes heartbeat {
+  0%,100%{transform:scale(1)} 14%{transform:scale(1.28)} 28%{transform:scale(1)} 42%{transform:scale(1.18)} 56%{transform:scale(1)}
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .tools-grid { grid-template-columns: 1fr; }
+  header { padding: 0 14px; }
+  .hero h1 { letter-spacing: -0.8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">📚</div>
+    <div>
+      <div class="logo">Padhai<span class="with">With</span><span class="ai-word">AI</span></div>
+      <div class="tagline-head" id="headerTagline">Har Student Ka Smart Ustaad — Std 1 Se Degree Tak</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('hi',event)">🇮🇳 हिंदी</button>
+      <button class="lang-btn" onclick="setLang('gu',event)">🟠 ગુજ</button>
+      <button class="lang-btn" onclick="setLang('en',event)">🇬🇧 EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="announce">
+  ✨ Powered by <strong>Parth Vadhiya</strong> &nbsp;·&nbsp; <a href="https://padhaiwithAI.page.gd/index.php" target="_blank" style="background:linear-gradient(135deg,#6ee7f7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;text-decoration:none;letter-spacing:0.03em;">padhaiwithAI.page.gd</a> &nbsp;·&nbsp; Hindi · Gujarati · English
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge" id="heroBadge">FREE AI STUDY PLATFORM</div>
+  <h1 id="heroTitle">Padhai Karo <span class="glow">Smarter</span><br>AI Ke Saath!</h1>
+  <p id="heroDesc">Std 1 se lekar College tak — homework help, concept explanation, essay writing, exam prep — sab kuch ek jagah, bilkul free.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow">
+  <div class="stat-pill">
+    <div class="stat-icon">🛠️</div>
+    <div><div class="stat-num">18+</div><div class="stat-label" id="s1">AI Tools</div></div>
+  </div>
+  <div class="stat-pill">
+    <div class="stat-icon">🎓</div>
+    <div><div class="stat-num">Std 1–PG</div><div class="stat-label" id="s2">All Classes</div></div>
+  </div>
+  <div class="stat-pill">
+    <div class="stat-icon">⚡</div>
+    <div><div class="stat-num">24/7</div><div class="stat-label" id="s3">Available</div></div>
+  </div>
+  <div class="stat-pill">
+    <div class="stat-icon">🌐</div>
+    <div><div class="stat-num" id="s4num">3 Bhasha</div><div class="stat-label" id="s4">Hindi · Gu · En</div></div>
+  </div>
+</div>
+
+<!-- CLASS FILTER -->
+<div class="class-filter">
+  <h2 id="classLabel">📌 Apni class chuniye</h2>
+  <div class="class-tabs">
+    <button class="class-tab" onclick="filterClass(event)">Std 1–5</button>
+    <button class="class-tab" onclick="filterClass(event)">Std 6–8</button>
+    <button class="class-tab" onclick="filterClass(event)">Std 9–10</button>
+    <button class="class-tab" onclick="filterClass(event)">Std 11–12</button>
+    <button class="class-tab active" onclick="filterClass(event)">🎓 College / Degree</button>
+  </div>
+</div>
+
+<!-- TOOLS GRID -->
+<div class="tools-section">
+  <div class="section-heading">
+    <div class="section-title" id="sectionTitle">✦ AI Study Tools <span class="pill">All Classes</span></div>
+  </div>
+  <div class="tools-grid" id="toolsGrid"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-inner">
+    Made with <span class="heart">❤️</span> &nbsp;·&nbsp; <span class="footer-logo">PadhaiWithAI</span> &nbsp;·&nbsp; Free Forever 🚀
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeIfOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon-wrap" id="modalIcon">🧠</div>
+      <div>
+        <div class="modal-title" id="modalTitle">Tool</div>
+        <div class="modal-subtitle" id="modalSubtitle">AI se poochho</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="quick-chips" id="quickChips"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <textarea class="chat-input" id="chatInput" rows="2" placeholder="Yahan apna sawaal likhein..." onkeydown="handleKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">Bhejo ➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── LANGUAGE STRINGS ─────────────────────────────────────────────
+const LANG = {
+  hi: {
+    tagline: 'Har Student Ka Smart Ustaad — Std 1 Se Degree Tak',
+    badge: 'FREE AI STUDY PLATFORM',
+    heroTitle: 'Padhai Karo <span class="glow">Smarter</span><br>AI Ke Saath!',
+    heroDesc: 'Std 1 se lekar College tak — homework help, concept explanation, essay writing, exam prep — sab kuch ek jagah, bilkul free.',
+    classLabel: '📌 Apni class chuniye',
+    sectionTitle: '✦ AI Study Tools <span class="pill">Sabhi Classes</span>',
+    s1:'AI Tools', s2:'Sabhi Classes', s3:'Uplabdh', s4:'Teen Bhasha', s4num:'Hindi · Gu · En',
+    sendBtn:'Bhejo ➤', inputPlaceholder:'Yahan apna sawaal likhein...',
+    loading:'Soch raha hoon...', greeting:'👋 Namaste! Main hoon',
+    greetingSub:'Koi quick question chunein ya apna sawaal likhein! 😊',
+    noAnswer:'(Jawab nahi mila, dobara try karein)', networkErr:'⚠️ Network error. Dobara try karein.'
+  },
+  gu: {
+    tagline: 'દરેક વિદ્યાર્થીનો AI ઉસ્તાદ — ધો. 1 થી ડિગ્રી સુધી',
+    badge: 'FREE AI STUDY PLATFORM',
+    heroTitle: 'ભણવાનું <span class="glow">Smart</span> બનાવો<br>AI સાથે!',
+    heroDesc: 'ધો. 1 થી કૉલેજ ડિગ્રી સુધી — હોમવર્ક, concept, નિબંધ, પરીક્ષા — બધું એક જ જગ્યાએ, બિલ્કુલ Free.',
+    classLabel: '📌 તમારો ધોરણ પસંદ કરો',
+    sectionTitle: '✦ AI અભ્યાસ સાધનો <span class="pill">બધાં ધોરણ</span>',
+    s1:'AI સાધનો', s2:'બધાં ધોરણ', s3:'ઉપલબ્ધ', s4:'ત્રણ ભાષા', s4num:'ગુ · હિ · En',
+    sendBtn:'મોકલો ➤', inputPlaceholder:'અહીં તમારો પ્રશ્ન લખો...',
+    loading:'વિચારી રહ્યો છું...', greeting:'👋 નમસ્તે! હું છું',
+    greetingSub:'નીચે ઝડપી પ્રશ્ન પસંદ કરો અથવા તમારો પ્રશ્ન લખો! 😊',
+    noAnswer:'(જવાબ ન મળ્યો, ફરી પ્રયાસ કરો)', networkErr:'⚠️ નેટવર્ક ભૂલ. ફરી પ્રયાસ.'
+  },
+  en: {
+    tagline: "Every Student's Smart AI Tutor — Std 1 to Degree",
+    badge: 'FREE AI STUDY PLATFORM',
+    heroTitle: 'Study <span class="glow">Smarter</span><br>with AI!',
+    heroDesc: 'From Std 1 to College Degree — homework help, concept explanation, essay writing, exam prep — all in one place, completely free.',
+    classLabel: '📌 Choose your class',
+    sectionTitle: '✦ AI Study Tools <span class="pill">All Classes</span>',
+    s1:'AI Tools', s2:'All Classes', s3:'Available', s4:'3 Languages', s4num:'Hi · Gu · En',
+    sendBtn:'Send ➤', inputPlaceholder:'Type your question here...',
+    loading:'Thinking...', greeting:'👋 Hello! I am',
+    greetingSub:'Pick a quick question below or type your own! 😊',
+    noAnswer:'(No answer, please try again)', networkErr:'⚠️ Network error. Please try again.'
+  }
+};
+
+// ─── TOOLS DATA ───────────────────────────────────────────────────
+const TOOLS_DATA = [
+  {
+    id:'explain', color:'cyan', icon:'🧠',
+    name:{ hi:'Concept Explainer', gu:'કન્સેપ્ટ સ્પષ્ટીકરણ', en:'Concept Explainer' },
+    desc:{ hi:'Koi bhi concept simple bhasha mein samjhao — example aur memory trick ke saath.', gu:'કોઈ પણ concept સરળ ભાષામાં — ઉ. + trick.', en:'Explain any concept in simple language with examples and memory tricks.' },
+    tags:[{c:'cyan',l:'All Classes'},{c:'cyan',l:'All Subjects'}],
+    chips:{ hi:['Photosynthesis kya hai?','Democracy explain karo','Gravity kya hoti hai?','Fraction kaise kaam karta hai?'], gu:['પ્રકાશ સં. શું?','લોકશાહી','ગુ.ત.','અ.'], en:['What is photosynthesis?','Explain democracy','What is gravity?','How do fractions work?'] },
+    system:{ hi:`Tum ek friendly Indian teacher ho. Concepts simple Hinglish mein samjhate ho. Pehle simple definition, phir real-life example, phir memory trick. Chhote students ke liye aur bhi simple.`, gu:`ગુ. teacher. સ્પ. def, ઉ., trick. ગુ.`, en:`You are a friendly Indian teacher. Explain concepts in simple English: definition, real-life example, memory trick. Very simple for younger students.` }
+  },
+  {
+    id:'homework', color:'orange', icon:'📝',
+    name:{ hi:'Homework Helper', gu:'હોમવર્ક મદદ', en:'Homework Helper' },
+    desc:{ hi:'Ghar ka kaam solve karo step-by-step explanation ke saath — har subject.', gu:'ઘ.ક. step-by-step — બ.વ.', en:'Solve homework with clear step-by-step explanations — every subject.' },
+    tags:[{c:'orange',l:'Std 1–12'},{c:'orange',l:'All Subjects'}],
+    chips:{ hi:['2x + 5 = 15 solve karo','Essay on trees','The water cycle explain','Draw and label a cell'], gu:['2x+5=15','વ.નિ.','જ.ચ.','કો.'], en:['Solve 2x + 5 = 15','Essay on trees','Explain the water cycle','Label a cell diagram'] },
+    system:{ hi:`Tum expert tutor ho. Homework step-by-step solve karo, har step clearly explain karo. Hinglish.`, gu:`નિ.ટ્ . step-by-step. ગુ.`, en:`You are an expert tutor. Solve homework step-by-step. Explain each step clearly so the student understands. English.` }
+  },
+  {
+    id:'essay', color:'emerald', icon:'✍️',
+    name:{ hi:'Essay / Nibandh Writer', gu:'નિબંધ લેખક', en:'Essay Writer' },
+    desc:{ hi:'Hindi, Gujarati ya English mein behtareen essay — intro, body, conclusion ke saath.', gu:'ગુ, હિ, En — ઉ.નિ. — intro, body, conclusion.', en:'Excellent essays in English, Hindi, or Gujarati — from school to college level.' },
+    tags:[{c:'emerald',l:'Hindi'},{c:'emerald',l:'Gujarati'},{c:'emerald',l:'English'}],
+    chips:{ hi:['Mere priya neta par nibandh','Essay on climate change','Jal hai toh kal hai','Technology in education'], gu:['નેતા','પ.ન.','જ.','ટ.શ.'], en:['My favourite leader essay','Climate change essay','Importance of water','Technology in education'] },
+    system:{ hi:`Tum expert essay writer ho. Structured essay: Introduction, Body (2-3 paragraphs), Conclusion. Hindi ya English.`, gu:`નિ.નિ. ગુ. Intro, Body, Conclusion.`, en:`You are an expert essay writer. Write structured: Introduction, Body (2-3 paragraphs), Conclusion. English.` }
+  },
+  {
+    id:'math', color:'violet', icon:'🔢',
+    name:{ hi:'Math Solver', gu:'ગણિત ઉકેલ', en:'Math Solver' },
+    desc:{ hi:'Basic arithmetic se calculus tak — har ganit ka sawaal step-by-step hal karo.', gu:'અ. થી ક. — step-by-step.', en:'From basic arithmetic to calculus — every math problem solved step-by-step.' },
+    tags:[{c:'violet',l:'Maths'},{c:'violet',l:'Step-by-Step'}],
+    chips:{ hi:['Area of circle radius 7','Solve: 3x² - 12 = 0','LCM of 12 and 18','Integration of x² dx'], gu:['ત્રિ.7','3x²-12=0','LCM 12,18','x² સ.'], en:['Area of circle radius 7','Solve: 3x² - 12 = 0','LCM of 12 and 18','Integrate x²'] },
+    system:{ hi:`Tum maths teacher ho. Har problem step-by-step solve karo, Hinglish.`, gu:`ગ.શ. step-by-step. ગુ.`, en:`You are a math teacher. Solve step-by-step, explaining each step clearly. English.` }
+  },
+  {
+    id:'science', color:'cyan', icon:'🔬',
+    name:{ hi:'Science Q&A', gu:'વિ. પ્ર&ઉ', en:'Science Q&A' },
+    desc:{ hi:'Physics, Chemistry, Biology — koi bhi sawaal poochho, clear jawab milega.', gu:'ભૌ, ર., જ. — clear jawab.', en:'Physics, Chemistry, Biology — ask anything, get clear accurate answers.' },
+    tags:[{c:'cyan',l:'Physics'},{c:'cyan',l:'Chemistry'},{c:'cyan',l:'Biology'}],
+    chips:{ hi:["Newton ke teen laws","H2O ka structure","Mitosis vs Meiosis","Ohm ka niyam"], gu:['ન્.ત.','H2O','Mitosis','ઓ.'], en:["Newton's 3 laws","H2O structure","Mitosis vs Meiosis","Ohm's law"] },
+    system:{ hi:`Tum science teacher ho — Physics, Chemistry, Biology teeno mein expert. Hinglish.`, gu:`વ.શ. ત્ .ન. ગુ.`, en:`You are a science teacher — expert in Physics, Chemistry, Biology. Clear, accurate English.` }
+  },
+  {
+    id:'mcq', color:'orange', icon:'📋',
+    name:{ hi:'MCQ Quiz Generator', gu:'MCQ ક્વિઝ', en:'MCQ Quiz Generator' },
+    desc:{ hi:'Kisi bhi topic par 5 practice MCQ banao — answer explanation ke saath.', gu:'5 MCQ + explanation. પ.તૈ!', en:'Generate 5 MCQs on any topic with correct answer explanations.' },
+    tags:[{c:'orange',l:'Exam Prep'},{c:'orange',l:'All Subjects'}],
+    chips:{ hi:['Class 10 Science – Light','Indian History','Class 12 Chemistry','English Grammar Tenses'], gu:['ધ.10 વ-પ.','ભ.ઇ.','ધ.12 ર.','ગ.'], en:['Class 10 Science – Light','Indian History','Class 12 Chemistry','English Grammar Tenses'] },
+    system:{ hi:`Tum exam expert ho. 5 MCQ (A,B,C,D) banao. Sahi answer bold karke explain karo. Hinglish.`, gu:`5 MCQ bold+explain. ગુ.`, en:`You are an exam expert. Create 5 MCQs (A, B, C, D). Mark the correct answer in bold and briefly explain. English.` }
+  },
+  {
+    id:'summary', color:'emerald', icon:'📄',
+    name:{ hi:'Chapter Summarizer', gu:'પ્રકરણ સારાંશ', en:'Chapter Summarizer' },
+    desc:{ hi:'Lamba chapter paste karo — bullet-point summary aur key terms milenge.', gu:'Chapter paste — bullet summary + terms.', en:'Paste any chapter — get a clean bullet-point summary with key terms.' },
+    tags:[{c:'emerald',l:'Quick Revision'},{c:'emerald',l:'All Classes'}],
+    chips:{ hi:['The French Revolution key points','Democracy chapter points','Acids & Bases summary'], gu:['ફ.ક.','લ.મ.','ઍ-બ.'], en:['French Revolution key points','Democracy chapter points','Acids & Bases summary'] },
+    system:{ hi:`Tum study helper ho. Summary: main points bullet, important terms bold, ek line conclusion. Hinglish.`, gu:`Bullet summary. Bold terms. ગુ.`, en:`You are a study helper. Summarize: bullet points, bold key terms, one-line conclusion. English.` }
+  },
+  {
+    id:'grammar', color:'violet', icon:'📖',
+    name:{ hi:'Grammar & Language', gu:'વ્ .& ભ.', en:'Grammar & Language' },
+    desc:{ hi:'English, Hindi ya Gujarati grammar check karo, mistakes correct karo aur rules seekho.', gu:'ભ.ભ. check + rules. ત.ભ.', en:'Check and correct grammar in English, Hindi, or Gujarati — learn the rules too.' },
+    tags:[{c:'violet',l:'Gujarati'},{c:'violet',l:'English'},{c:'violet',l:'Hindi'}],
+    chips:{ hi:['She go to school – correct karo','Tenses ka chart banao','Meri writing improve karo'], gu:['She go – સ.','Tenses','writing'], en:['She go to school – correct it','Make a tenses chart','Improve my writing'] },
+    system:{ hi:`Tum language teacher ho. Grammar correct karo, rules explain karo. Hinglish.`, gu:`ભ.શ. ભ.સ. rules. ગુ.`, en:`You are a language teacher. Correct grammar, explain rules with examples. Handle English, Hindi, Gujarati. English.` }
+  },
+  {
+    id:'coding', color:'cyan', icon:'💻',
+    name:{ hi:'Coding Tutor', gu:'Coding ટ્.', en:'Coding Tutor' },
+    desc:{ hi:'Python, C++, Java, HTML — code seekho, debug karo, projects banao.', gu:'Py, C++, Java, HTML — code + debug.', en:'Learn Python, C++, Java, HTML — write, debug, and build projects.' },
+    tags:[{c:'cyan',l:'College'},{c:'cyan',l:'Programming'}],
+    chips:{ hi:['Python mein for loop','Hello World in C++','HTML page kaise banaen','Function kya hai?'], gu:['Python for','Hello C++','HTML','Function?'], en:['Python for loop example','Hello World in C++','Create an HTML page','What is a function?'] },
+    system:{ hi:`Tum programming teacher ho. Code clearly explain karo, examples do, errors fix karo. Hinglish.`, gu:`prog.teacher. ગુ.`, en:`You are a programming teacher. Explain code clearly with examples. Fix errors. English.` }
+  },
+  {
+    id:'history', color:'orange', icon:'🏛️',
+    name:{ hi:'History & Civics', gu:'ઇ.& ના.', en:'History & Civics' },
+    desc:{ hi:'Itihaas, Nagarik Shastra, Geography — dates, events, maps explain karo.', gu:'ઇ., ભ., ના. — dates, events.', en:'History, Civics, Geography — dates, events, maps all explained clearly.' },
+    tags:[{c:'orange',l:'Social Science'},{c:'orange',l:'SST'}],
+    chips:{ hi:['1857 ki kranti ke karan','Indian Constitution kab bana?','Mughal Empire rulers','Panchayati Raj'], gu:['1857','બ.','મ.','પ.ત.'], en:['Causes of 1857 revolt','Indian Constitution facts','Mughal Empire rulers','Panchayati Raj'] },
+    system:{ hi:`Tum Social Science teacher ho — History, Geography, Civics. Hinglish.`, gu:`સ.વ.શ. ઇ,ભ,ના. ગુ.`, en:`You are a Social Science teacher — History, Geography, Civics. Clear English.` }
+  },
+  {
+    id:'notes', color:'emerald', icon:'📒',
+    name:{ hi:'Smart Notes Maker', gu:'Smart Notes', en:'Smart Notes Maker' },
+    desc:{ hi:'Kisi bhi topic ke structured, point-wise notes banao — revision ke liye perfect.', gu:'Structured notes — revision.', en:'Structured, point-wise revision notes on any topic.' },
+    tags:[{c:'emerald',l:'All Subjects'},{c:'emerald',l:'Revision'}],
+    chips:{ hi:['Electricity chapter notes','French Revolution notes','Tenses – quick notes'], gu:['વ.પ.','ફ.ક.','Tenses'], en:['Electricity chapter notes','French Revolution notes','Quick Tenses notes'] },
+    system:{ hi:`Tum notes expert ho. Headings, bullets, key terms bold. Hinglish.`, gu:`Notes. Heading, bullet, bold. ગુ.`, en:`You are a notes expert. Headings, bullet points, key terms bold. English.` }
+  },
+  {
+    id:'career', color:'violet', icon:'🎯',
+    name:{ hi:'Career Guidance', gu:'Career Guidance', en:'Career Guidance' },
+    desc:{ hi:'Std 10 ke baad kya karein? Stream, college, career ka sahi raasta.', gu:'Stream, college, career — right path.', en:'What after Std 10? Stream selection, college, career guidance.' },
+    tags:[{c:'violet',l:'Std 10+'},{c:'violet',l:'College'}],
+    chips:{ hi:['Science ya Commerce kya lu?','Engineering vs Medical','Arts mein career options','Government job'], gu:['Sci/Com?','Eng vs Med','Arts','Govt'], en:['Science or Commerce?','Engineering vs Medical','Arts career options','Government jobs'] },
+    system:{ hi:`Tum experienced career counselor ho. Career, stream, college, entrance exams guidance. Hinglish.`, gu:`Career counselor. ગુ.`, en:`You are an experienced career counselor. Guide on career, streams, colleges, entrance exams. English.` }
+  },
+  {
+    id:'flashcard', color:'emerald', icon:'🃏',
+    name:{ hi:'Flashcard Generator', gu:'Flashcard', en:'Flashcard Generator' },
+    desc:{ hi:'Topic doge toh 8-10 flashcards ban jaenge — Q&A format mein yaad karo.', gu:'Topic — 8-10 Q&A Flashcards.', en:'Give a topic — get 8-10 Q&A flashcards for quick memorization.' },
+    tags:[{c:'emerald',l:'Memory'},{c:'emerald',l:'All Classes'}],
+    chips:{ hi:['Class 10 Science flashcards','Indian History dates','Physics formulas'], gu:['ધ.10 વ.','ઇ.ત.','ભ.f.'], en:['Class 10 Science flashcards','Indian History dates','Physics formula cards'] },
+    system:{ hi:`Tum flashcard creator ho. 8-10 "Q: ... A: ..." format, key terms bold. Hinglish.`, gu:`8-10 "Q:...A:..." bold. ગુ.`, en:`You are a flashcard creator. Make 8-10 flashcards: "Q: ... A: ..." with key terms bold. English.` }
+  },
+  {
+    id:'translate', color:'orange', icon:'🌐',
+    name:{ hi:'Hindi ↔ English Translator', gu:'ભાષા Translator', en:'Language Translator' },
+    desc:{ hi:'Hindi, English, Gujarati teeno bhasha mein accurate translation karo.', gu:'ગુ ↔ En ↔ Hi accurate.', en:'Accurate translation between Gujarati, Hindi, and English.' },
+    tags:[{c:'orange',l:'Gujarati'},{c:'orange',l:'Hindi'},{c:'orange',l:'English'}],
+    chips:{ hi:['Translate: Democracy means rule','Anuvad: Sun rises in east','English mein: Paani ka mahatva'], gu:['Demo → ગુ','Sun → ગુ','Water → En'], en:['Translate to Gujarati: Water is life','Translate to Hindi: The sky is blue','Translate to English: sentence'] },
+    system:{ hi:`Tum translator ho — Hindi, English, Gujarati accurate translation karo.`, gu:`Translator. ત્. ગુ.`, en:`You are a translator. Accurately translate between Gujarati, Hindi, and English. Academic vocabulary.` }
+  },
+  {
+    id:'story', color:'violet', icon:'📚',
+    name:{ hi:'Story & Creative Writing', gu:'વ. & Creative', en:'Story & Creative Writing' },
+    desc:{ hi:'Kahaniyan, poems, creative writing — school assignments ke liye perfect.', gu:'વ., ક., creative — school.', en:'Stories, poems, and creative writing — perfect for school assignments.' },
+    tags:[{c:'violet',l:'Primary'},{c:'violet',l:'Middle School'}],
+    chips:{ hi:['Ek billi ki kahani','Short poem on rain','Story: A magical school'], gu:['બ.વ.','વ.ક.','જ.શ.'], en:['Story about a cat','Short poem about rain','Story: A magical school'] },
+    system:{ hi:`Tum creative writing teacher ho. Fun aur engaging stories, poems. Hindi ya English.`, gu:`Creative writing. ગુ.`, en:`You are a creative writing teacher. Help write engaging stories, poems. Simple for younger, advanced for older. English.` }
+  },
+  {
+    id:'college', color:'cyan', icon:'🎓',
+    name:{ hi:'College Assignment Helper', gu:'College Assignment', en:'College Assignment Helper' },
+    desc:{ hi:'Reports, case studies, research papers — college-level academic content.', gu:'Reports, research — college.', en:'Reports, case studies, research papers — college-level content.' },
+    tags:[{c:'cyan',l:'Degree'},{c:'cyan',l:'University'}],
+    chips:{ hi:['Marketing case study','Research paper intro','Literature review kaise likhein'], gu:['Mkt.','Research','Lit.rev.'], en:['Marketing case study outline','Research paper introduction','How to write a literature review'] },
+    system:{ hi:`Tum college academic assistant ho. Research papers, reports, case studies. Academic tone. Hinglish.`, gu:`College academic. Prof. ગુ.`, en:`You are a college academic assistant. Professional: research papers, reports, case studies. Academic tone in English.` }
+  },
+  {
+    id:'grammar2', color:'orange', icon:'🗣️',
+    name:{ hi:'English Speaking Trainer', gu:'English Speaking', en:'English Speaking Trainer' },
+    desc:{ hi:'Roz English bolna seekho — conversations, pronunciation tips, common phrases.', gu:'English speak — conv., tips.', en:'Learn to speak English daily — conversations, pronunciation tips, common phrases.' },
+    tags:[{c:'orange',l:'Speaking'},{c:'orange',l:'All Levels'}],
+    chips:{ hi:['Introduce myself in English','Job interview phrases','Common English phrases','How to improve fluency'], gu:['Intro','Interview','Phrases','Fluency'], en:['How to introduce myself','Job interview phrases','Common daily phrases','Tips to improve fluency'] },
+    system:{ hi:`Tum English speaking coach ho. Conversations practice, pronunciation tips, common phrases. Hinglish mein explain, English mein examples.`, gu:`English coach. Conv. ગુ. + En eg.`, en:`You are an English speaking coach. Practice conversations, give pronunciation tips, teach common phrases. Simple, encouraging tone. English.` }
+  },
+  {
+    id:'mindmap', color:'emerald', icon:'🗺️',
+    name:{ hi:'Mind Map & Diagram Helper', gu:'Mind Map', en:'Mind Map Helper' },
+    desc:{ hi:'Kisi bhi topic ka text-based mind map ya diagram banao — visual learning.', gu:'Topic — text mind map.', en:'Create text-based mind maps and diagrams on any topic for visual learning.' },
+    tags:[{c:'emerald',l:'Visual Learning'},{c:'emerald',l:'All Classes'}],
+    chips:{ hi:['Photosynthesis mind map','French Revolution diagram','India map of rivers','Human digestive system'], gu:['પ.સ.','ફ.ક.','ન.','પ.ત.'], en:['Photosynthesis mind map','French Revolution diagram','Rivers of India','Digestive system diagram'] },
+    system:{ hi:`Tum visual learning expert ho. Text-based mind maps aur diagrams banao using ASCII/text. Structured, clear. Hinglish.`, gu:`Visual expert. Text mind map. ગુ.`, en:`You are a visual learning expert. Create clear text-based mind maps and diagrams using structured text/ASCII. English.` }
+  }
+];
+
+// ─── STATE ────────────────────────────────────────────────────────
+let currentLang = 'hi';
+let currentTool = null;
+let chatHistory = [];
+let isLoading = false;
+
+// ─── RENDER ───────────────────────────────────────────────────────
+function renderTools() {
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = TOOLS_DATA.map(t => {
+    const name = t.name[currentLang];
+    const desc = t.desc[currentLang];
+    const tagsHtml = t.tags.map(g => `<span class="tag ${g.c}">${g.l}</span>`).join('');
+    return `<div class="tool-card ${t.color}" onclick="openTool('${t.id}')">
+      <div class="tool-glow"></div>
+      <div class="tool-icon">${t.icon}</div>
+      <div class="tool-name">${name}</div>
+      <div class="tool-desc">${desc}</div>
+      <div class="tool-tags">${tagsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── LANGUAGE ─────────────────────────────────────────────────────
+function setLang(lang, evt) {
+  currentLang = lang;
+  const L = LANG[lang];
+  document.getElementById('headerTagline').textContent = L.tagline;
+  document.getElementById('heroBadge').textContent = L.badge;
+  document.getElementById('heroTitle').innerHTML = L.heroTitle;
+  document.getElementById('heroDesc').textContent = L.heroDesc;
+  document.getElementById('classLabel').innerHTML = L.classLabel;
+  document.getElementById('sectionTitle').innerHTML = L.sectionTitle;
+  document.getElementById('s1').textContent = L.s1;
+  document.getElementById('s2').textContent = L.s2;
+  document.getElementById('s3').textContent = L.s3;
+  document.getElementById('s4').textContent = L.s4;
+  document.getElementById('s4num').textContent = L.s4num;
+  document.getElementById('sendBtn').textContent = L.sendBtn;
+  document.getElementById('chatInput').placeholder = L.inputPlaceholder;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if(evt && evt.target) evt.target.classList.add('active');
+  renderTools();
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────
+function filterClass(evt) {
+  document.querySelectorAll('.class-tab').forEach(t => t.classList.remove('active'));
+  if(evt && evt.target) evt.target.classList.add('active');
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────
+function openTool(toolId) {
+  const t = TOOLS_DATA.find(x => x.id === toolId);
+  if (!t) return;
+  currentTool = t;
+  chatHistory = [];
+  document.getElementById('modalIcon').textContent = t.icon;
+  document.getElementById('modalTitle').textContent = t.name[currentLang];
+  document.getElementById('modalSubtitle').textContent = t.desc[currentLang];
+  const chips = t.chips[currentLang] || t.chips['en'];
+  document.getElementById('quickChips').innerHTML = chips.map(c =>
+    `<button class="chip" onclick="useChip('${c.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">💡 ${c}</button>`
+  ).join('');
+  const L = LANG[currentLang];
+  document.getElementById('chatMessages').innerHTML = `<div class="msg ai">${L.greeting} <b>${t.name[currentLang]}</b> AI.\n\n${L.greetingSub}</div>`;
+  document.getElementById('chatInput').value = '';
+  document.getElementById('sendBtn').textContent = L.sendBtn;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function useChip(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeIfOutside(e) { if(e.target === document.getElementById('modalOverlay')) closeModal(); }
+function handleKey(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+// ─── SEND MESSAGE ─────────────────────────────────────────────────
+async function sendMessage() {
+  if(isLoading || !currentTool) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  const L = LANG[currentLang];
+  const msgDiv = document.getElementById('chatMessages');
+  msgDiv.innerHTML += `<div class="msg user">${escHtml(text)}</div>`;
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'msg ai loading';
+  loadingEl.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+  msgDiv.appendChild(loadingEl);
+  msgDiv.scrollTop = msgDiv.scrollHeight;
+  chatHistory.push({role:'user', content: text});
+  const systemPrompt = currentTool.system[currentLang] || currentTool.system['en'];
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || L.noAnswer;
+    chatHistory.push({role:'assistant', content: reply});
+    loadingEl.className = 'msg ai';
+    loadingEl.textContent = reply;
+  } catch(e) {
+    loadingEl.className = 'msg ai';
+    loadingEl.textContent = L.networkErr;
+  }
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('sendBtn').textContent = L.sendBtn;
+  msgDiv.scrollTop = msgDiv.scrollHeight;
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// Init
+renderTools();
+</script>
+</body>
+</html>
